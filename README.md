@@ -16,7 +16,7 @@ AZW / Beelink SER 迷你主机（Ryzen 7 5800H + Vega 核显）安装 macOS 的�
 | 声卡 | Realtek ALC897 | ✅ AppleALC（layout‑id 77）+ SimpleHDA（Tahoe 必需） |
 | 有线 | Realtek RTL8168 | ✅ RealtekRTL8111 |
 | Wi‑Fi | Intel AX200（8086:2723） | ✅ itlwm + HeliPort（5GHz 需改 2 字节，见文档） |
-| 蓝牙 | Intel AX200（USB 8087:0029） | ✅ IntelBluetoothFirmware **lshbluesky 2.5.3**（2.5.0 下 BLE 键盘会掉线） |
+| 蓝牙 | Intel AX200（USB 8087:0029） | ⚠️ 可用。IntelBluetoothFirmware **lshbluesky 2.5.3** 后 BLE 键盘掉线能 5 秒内自动重连，但偶尔仍会掉线（排查中） |
 | 睡眠 | — | ❌ 睡下去马上醒，已关闭睡眠 |
 
 ## 最终可用配置（Tahoe 26.7.2 / 25G332）
@@ -77,10 +77,10 @@ AZW / Beelink SER 迷你主机（Ryzen 7 5800H + Vega 核显）安装 macOS 的�
 
 Hackintosh notes for the **AZW / Beelink SER mini PC (AMD Ryzen 7 5800H, Vega 1002:1638)** running **macOS Tahoe 26.7.2 (25G332)** with OpenCore 1.0.8.
 
-- iGPU via **NootedRed 0.9.0‑pre‑release.15** (`-NRedDisplayFix`, SIP `430A0000`). GPU hangs on 15.8.3 were caused by NootedRed's reference data not matching the dyld cache; the docs explain how it was regenerated. On 26.7.2 the stock data matches.
+- iGPU via **NootedRed 0.9.0‑pre‑release.15** (`-NRedDisplayFix -NRedVideoFix`, SIP `430A0000`). GPU hangs on 15.8.3 were caused by NootedRed's reference data not matching the dyld cache; the docs explain how it was regenerated. On 26.7.2 the stock data matches.
 - Audio (ALC897): **AppleALC layout 77 + SimpleHDA** (Tahoe removed AppleHDA); needs `keepsyms=1` and `DisableLinkeditJettison`.
 - Wi‑Fi (AX200): itlwm 2.3.0 + HeliPort. A 2‑byte patch (`wpa.i_akms` 0xf → 0x3) fixes networks that advertise both PSK and PSK‑SHA256.
-- Bluetooth (AX200, 8087:0029): BLE keyboard kept dropping while typing (bluetoothd reason 708 = HCI 0x08 timeout, then repeated 762 = HCI 0x3E). Wi‑Fi, pairing and the keyboard itself were ruled out; upgrading **IntelBluetoothFirmware/IntelBTPatcher to the lshbluesky fork v2.5.3** fixed reconnection. A custom USBMap that worked on Sequoia made the whole XHC2 controller disappear on Tahoe — no USB map is used.
+- Bluetooth (AX200, 8087:0029): BLE keyboard kept dropping while typing (bluetoothd reason 708 = HCI 0x08 timeout, then repeated 762 = HCI 0x3E). Wi‑Fi, pairing and the keyboard itself were ruled out; upgrading **IntelBluetoothFirmware/IntelBTPatcher to the lshbluesky fork v2.5.3** made reconnection recover within ~5 s (2.5.0 failed for minutes), but occasional 708 timeouts while typing remain — still under investigation (AX200 RF/antenna on this box not yet ruled out). A custom USBMap that worked on Sequoia made the whole XHC2 controller disappear on Tahoe — no USB map is used.
 - Sleep is disabled (wakes immediately).
 
 The SMBIOS in `EFI-config/OC/config.plist` is blanked — generate your own. Third‑party kexts are not redistributed; see the table above for versions and sources.
